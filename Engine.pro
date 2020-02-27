@@ -16,35 +16,6 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-SOURCES += \
-    camera.cpp \
-    creatorgameobject.cpp \
-    font.cpp \
-    fps.cpp \
-    gameobject.cpp \
-    gamescene.cpp \
-    geometry.cpp \
-    layer.cpp \
-    managercamera.cpp \
-    managerfont.cpp \
-    managergameobject.cpp \
-    managergamescene.cpp \
-    managerkeyboard.cpp \
-    managermesh.cpp \
-    managermouse.cpp \
-    managershader.cpp \
-    managersprite.cpp \
-    managertexture.cpp \
-    managertilemap.cpp \
-    mesh.cpp \
-    object3d.cpp \
-    resources.cpp \
-    setting.cpp \
-    shader.cpp \
-    sprite.cpp \
-    texture.cpp \
-    tilemap.cpp \
-    transformer.cpp
 
 HEADERS += \
     camera.h \
@@ -76,6 +47,36 @@ HEADERS += \
     texture.h \
     tilemap.h \
     transformer.h
+
+SOURCES += \
+    camera.cpp \
+    creatorgameobject.cpp \
+    font.cpp \
+    fps.cpp \
+    gameobject.cpp \
+    gamescene.cpp \
+    geometry.cpp \
+    layer.cpp \
+    managercamera.cpp \
+    managerfont.cpp \
+    managergameobject.cpp \
+    managergamescene.cpp \
+    managerkeyboard.cpp \
+    managermesh.cpp \
+    managermouse.cpp \
+    managershader.cpp \
+    managersprite.cpp \
+    managertexture.cpp \
+    managertilemap.cpp \
+    mesh.cpp \
+    object3d.cpp \
+    resources.cpp \
+    setting.cpp \
+    shader.cpp \
+    sprite.cpp \
+    texture.cpp \
+    tilemap.cpp \
+    transformer.cpp
 
 # Default rules for deployment.
 unix {
