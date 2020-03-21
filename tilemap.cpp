@@ -69,6 +69,22 @@ bool TileMap::Load(QString filename)
             //Считка тайлесетов
             if (reader.name()=="tileset")
             {
+                ///*НОВЫЙ ФОРМАТ TILED v1.3.1
+                if (reader.attributes().hasAttribute("source"))
+                {
+                    QString source = reader.attributes().value("source").toString();
+                    int id = reader.attributes().value("firstgid").toInt();
+                    Sprite* sprite = new Sprite();
+                    sprite->SetMeshKey(key_mesh);
+                    sprite->SetShaderKey(key_shader);
+                    sprite->SetTextureKey(id);
+                    sprite->Create();
+                    list_sprite.append(sprite);
+                    qDebug()<<"TileSet:"<<source<<"Id:"<<id;
+                }
+                //НОВЫЙ ФОРМАТ TILED v1.3.1*/
+
+                /*СТАРЫЙ ФОРМАТ TILED
                 if (reader.attributes().hasAttribute("name"))
                 {
                     QString name = reader.attributes().value("name").toString();
@@ -90,6 +106,7 @@ bool TileMap::Load(QString filename)
                     }
 
                 }
+                //СТАРЫЙ ФОРМАТ TILED*/
             }
             //Считка слоёв
             if (reader.name()=="layer")
@@ -103,6 +120,28 @@ bool TileMap::Load(QString filename)
                     {
                         Layer* layer = new Layer();
                         layer->Create(count_x, count_y);
+
+                        ///*НОВЫЙ ФОРМАТ TILED v1.3.1
+                        reader.readNext();
+                        QVector<QStringRef> vec = reader.text().split(",");
+                        qDebug()<<"count_x*count_y:"<<count_x*count_y<<"vec.size():"<<vec.size();
+                        int i = 0;
+                        int j1, j2;
+                        j1 = j2 = 0;
+                        while(i<count_x*count_y)
+                        {
+                            layer->SetValue(j1, j2, vec[i].toInt());
+                            j2++;
+                            if (j2==count_x)
+                            {
+                                j1++;
+                                j2 = 0;
+                            }
+                            i++;
+                        }
+                        //НОВЫЙ ФОРМАТ TILED v1.3.1*/
+
+                        /*СТАРЫЙ ФОРМАТ TILED
                         int i = 0;
                         int j1, j2;
                         j1 = j2 = 0;
@@ -127,18 +166,19 @@ bool TileMap::Load(QString filename)
                                 }
                             }
                         }
+                        //СТАРЫЙ ФОРМАТ TILED*/
                         DataLayer data;
                         data.layer_name = name;
                         data.layer = layer;
                         list_layer.append(data);
                         qDebug()<<"Layer:"<<name;
-                        for (int i=0;i<count_y;i++)
+                        /*for (int i=0;i<count_y;i++)
                         {
                             for (int j=0;j<count_x;j++)
                             {
-                                //qDebug()<<layer->GetValue(i, j);
+                                qDebug()<<layer->GetValue(i, j);
                             }
-                        }
+                        }*/
                     }
                 }
             }
@@ -172,6 +212,10 @@ void TileMap::Clear()
 void TileMap::Draw()
 {
     Transformer tr;
+
+    double new_tile_width = Setting::GetKoefX() * tile_width;
+    double new_tile_height = Setting::GetKoefY() * tile_height;
+    //qDebug()<<"new_tile_width:"<<new_tile_width<<"new_tile_height:"<<new_tile_height;
     tr.SetScalX(tile_width);
     tr.SetScalY(tile_height);
 
@@ -203,6 +247,8 @@ void TileMap::Draw()
                     int frame_y = tmp_id/tmp_x;
                     int frame_x = (tmp_x*tmp_y)-(frame_y*tmp_x)-tmp_id;
                     sprite->Bind(tile_width, tile_height, frame_x-1, frame_y);
+                    QMatrix4x4 mat = Setting::GetProjection()*ManagerCamera::getInstance()->GetCurrentCamera()->GetMatrix()*tr.GetMatrix();
+                    //qDebug()<<"Result Mat Tile:"<<mat;
                     sprite->GetShader()->setUniformValue(sprite->GetShader()->GetNameMatrixPos().toStdString().c_str(), Setting::GetProjection()*ManagerCamera::getInstance()->GetCurrentCamera()->GetMatrix()*tr.GetMatrix());
                     glDrawArrays(GL_TRIANGLES, 0, sprite->GetMesh()->GetCountVertex());
                     sprite->UnBind();
@@ -220,6 +266,11 @@ void TileMap::Draw()
 void TileMap::Draw(QRectF rect)
 {
     Transformer tr;
+
+    //qDebug()<<"koefX:"<<Setting::GetKoefX()<<"koefY:"<<Setting::GetKoefY();
+    double new_tile_width = Setting::GetKoefX() * tile_width;
+    double new_tile_height = Setting::GetKoefY() * tile_height;
+    //qDebug()<<"new_tile_width:"<<new_tile_width<<"new_tile_height:"<<new_tile_height;
     tr.SetScalX(tile_width);
     tr.SetScalY(tile_height);
 
