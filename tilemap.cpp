@@ -182,6 +182,39 @@ bool TileMap::Load(QString filename)
                     }
                 }
             }
+            //Считка игровых-объектов
+            if (reader.name()=="object")
+            {
+                QString name = "";
+                if (reader.attributes().hasAttribute("name"))
+                {
+                    name = reader.attributes().value("name").toString();
+                    if (reader.attributes().hasAttribute("x") && reader.attributes().hasAttribute("y")
+                            && reader.attributes().hasAttribute("width") && reader.attributes().hasAttribute("height"))
+                    {
+                        float x = reader.attributes().value("x").toFloat();
+                        float y = reader.attributes().value("y").toFloat();
+                        float width = reader.attributes().value("width").toFloat();
+                        float height = reader.attributes().value("height").toFloat();
+                        y = (tile_height * count_y) - y - height; // Позиция нижний-левый угол
+                        QRectF rect(x, y, width, height);
+                        qDebug()<<"Rect:"<<name<<rect;
+                        GameObject* object = ManagerGameObject::getInstance()->GetValue(name);
+                        if(object)
+                        {
+                            qDebug()<<"Find GameObject:"<<name;
+                            QHash<QString, QString> property;
+                            property.insert("tiled_property", "rect");
+                            property.insert("rect",
+                                            QString::number(rect.x()) + "," +
+                                            QString::number(rect.y()) + "," +
+                                            QString::number(rect.width())+"," +
+                                            QString::number(rect.height()));
+                            object->Init(property);
+                        }
+                    }
+                }
+            }
         }
     }
 

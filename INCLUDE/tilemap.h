@@ -15,6 +15,7 @@
 #include "managershader.h"
 #include "managertexture.h"
 #include "managercamera.h"
+#include "managergameobject.h"
 
 class TileMap
 {

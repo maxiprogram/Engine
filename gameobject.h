@@ -15,9 +15,12 @@ public:
     virtual void Draw()=0;
     void SetName(QString name);
     QString GetName();
+    void SetVisible(bool value);
+    bool GetVisible();
 
 private:
     QString name;
+    bool visible;
 };
 
 #endif // GAMEOBJECT_H

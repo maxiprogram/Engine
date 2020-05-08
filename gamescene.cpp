@@ -291,7 +291,10 @@ void GameScene::Draw()
     {
         QHash<QString, GameObject*>::iterator it = list_it.at(i);
         GameObject* obj = it.value();
-        obj->Draw();
+        if(obj->GetVisible())
+        {
+            obj->Draw();
+        }
     }
 }
 
@@ -302,16 +305,21 @@ void GameScene::Draw(QRectF rect)
         QHash<QString, GameObject*>::iterator it = list_it.at(i);
         GameObject* obj = it.value();
 
-        QVector3D pos = obj->GetPos();
-        QVector3D scal = obj->GetScal();
-        QVector3D pivot = obj->GetPivot();
-        QRectF rect_pos;
-        rect_pos.setLeft(pos.x()-scal.x()*pivot.x());
-        rect_pos.setTop(pos.y()-scal.y()*pivot.y());
-        rect_pos.setWidth(scal.x());
-        rect_pos.setHeight(scal.y());
-        if (rect_pos.intersects(rect))
-            obj->Draw();
+        if(obj->GetVisible())
+        {
+            QVector3D pos = obj->GetPos();
+            QVector3D scal = obj->GetScal();
+            QVector3D pivot = obj->GetPivot();
+            QRectF rect_pos;
+            rect_pos.setLeft(pos.x()-scal.x()*pivot.x());
+            rect_pos.setTop(pos.y()-scal.y()*pivot.y());
+            rect_pos.setWidth(scal.x());
+            rect_pos.setHeight(scal.y());
+            if (rect_pos.intersects(rect))
+            {
+                obj->Draw();
+            }
+        }
     }
 }
 
