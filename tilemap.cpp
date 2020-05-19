@@ -41,7 +41,7 @@ void TileMap::SetShaderKey(int key)
     key_shader = key;
 }
 
-bool TileMap::Load(QString filename)
+bool TileMap::Load(QString filename, CreatorGameObject* creator, QList<QMultiHash<QString, GameObject*>::iterator>* list_it)
 {
     Clear();
     QFile f(filename);
@@ -189,29 +189,89 @@ bool TileMap::Load(QString filename)
                 if (reader.attributes().hasAttribute("name"))
                 {
                     name = reader.attributes().value("name").toString();
+                    QHash<QString, QString> property;
+                    float pos_x = 0;
+                    float pos_y = 0;
+                    // Object-Rect
                     if (reader.attributes().hasAttribute("x") && reader.attributes().hasAttribute("y")
                             && reader.attributes().hasAttribute("width") && reader.attributes().hasAttribute("height"))
                     {
-                        float x = reader.attributes().value("x").toFloat();
-                        float y = reader.attributes().value("y").toFloat();
+                        pos_x = reader.attributes().value("x").toFloat();
+                        pos_y = reader.attributes().value("y").toFloat();
                         float width = reader.attributes().value("width").toFloat();
                         float height = reader.attributes().value("height").toFloat();
-                        y = (tile_height * count_y) - y - height; // Позиция нижний-левый угол
-                        QRectF rect(x, y, width, height);
+                        pos_y = (tile_height * count_y) - pos_y - height; // Позиция нижний-левый угол
+                        QRectF rect(pos_x, pos_y, width, height);
                         qDebug()<<"Rect:"<<name<<rect;
-                        GameObject* object = ManagerGameObject::getInstance()->GetValue(name);
-                        if(object)
+                        property.insert("tiled_property", "rect");
+                        property.insert("rect",
+                                        QString::number(rect.x()) + "," +
+                                        QString::number(rect.y()) + "," +
+                                        QString::number(rect.width())+"," +
+                                        QString::number(rect.height()));
+                    } else // Object-Polygon
+                    {
+                        pos_x = reader.attributes().value("x").toFloat();
+                        pos_y = reader.attributes().value("y").toFloat();
+                        pos_y = (tile_height * count_y) - pos_y;
+                        qDebug()<<"Polygon:"<<name;
+                        property.insert("tiled_property", "polygon");
+                    }
+                    GameObject* object = 0;
+                    if(reader.attributes().hasAttribute("type") && creator != 0 && list_it != 0)
+                    {
+                        uint type = reader.attributes().value("type").toUInt();
+                        object = creator->CreateGameObject(type);
+                        object->SetName(name);
+                        object->SetType(type);
+                        // call_back(object);
+                        QMultiHash<QString, GameObject*>::iterator it = ManagerGameObject::getInstance()->Add(object->GetName(), object);
+                        list_it->append(it);
+                        qDebug()<<"Create GameObject:"<<name;
+                    } else
+                    {
+                        object = ManagerGameObject::getInstance()->GetValue(name);
+                    }
+                    if(object)
+                    {
+                        qDebug()<<"Find GameObject:"<<name;
+                        reader.readNext();
+                        reader.readNext();
+                        if(reader.isStartElement() && reader.name() == "properties")
                         {
-                            qDebug()<<"Find GameObject:"<<name;
-                            QHash<QString, QString> property;
-                            property.insert("tiled_property", "rect");
-                            property.insert("rect",
-                                            QString::number(rect.x()) + "," +
-                                            QString::number(rect.y()) + "," +
-                                            QString::number(rect.width())+"," +
-                                            QString::number(rect.height()));
-                            object->Init(property);
+                            reader.readNext();
+                            reader.readNext();
+                            while (reader.isStartElement() && reader.name() == "property")
+                            {
+                                QString name = reader.attributes().value("name").toString();
+                                QString value = reader.attributes().value("value").toString();
+                                property.insert(name, value);
+                                reader.readNext();
+                                reader.readNext();
+                                reader.readNext();
+                                qDebug()<<"Name:"<<name<<"value:"<<value;
+                            }
                         }
+                        if(reader.isStartElement() && reader.name() == "polygon")
+                        {
+                            if (reader.attributes().hasAttribute("points"))
+                            {
+                                QStringList tmp_list = reader.attributes().value("points").toString().split(" ");
+                                QStringList result_list;                                
+                                for(int i=0; i<tmp_list.length(); i++)
+                                {
+                                    int pos = tmp_list.at(i).indexOf(",");
+                                    float x = tmp_list.at(i).left(pos).toFloat();
+                                    float y = tmp_list.at(i).mid(pos + 1).toFloat();
+                                    y = -y; // Позиция нижний-левый угол
+                                    result_list.append(QString::number(pos_x+x)+","+QString::number(pos_y+y));
+                                }
+                                result_list.append(QString::number(pos_x)+","+QString::number(pos_y));
+                                qDebug()<<"Polygon:"<<name<<result_list.join(" ");
+                                property.insert("polygon", result_list.join(" "));
+                            }
+                        }
+                        object->Init(property);
                     }
                 }
             }

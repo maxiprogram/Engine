@@ -11,6 +11,7 @@
 #include "layer.h"
 #include "transformer.h"
 #include "sprite.h"
+#include "creatorgameobject.h"
 #include "managermesh.h"
 #include "managershader.h"
 #include "managertexture.h"
@@ -29,7 +30,7 @@ public:
     int GetTileHeight();
     int GetTileCountWidth();
     int GetTileCountHeight();
-    bool Load(QString filename);
+    bool Load(QString filename, CreatorGameObject* creator = 0, QList<QMultiHash<QString, GameObject*>::iterator>* list_it = 0);
     void Clear();
     void Destroy();
     void Draw();

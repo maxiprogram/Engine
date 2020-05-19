@@ -167,7 +167,7 @@ bool GameScene::Load(QString filename, CreatorGameObject* creator)
                     QString filename = reader.text().toString();
                     TileMap::getInstance()->SetMeshKey(mid);
                     TileMap::getInstance()->SetShaderKey(sid);
-                    TileMap::getInstance()->Load(filename);
+                    TileMap::getInstance()->Load(filename, creator, &this->list_it);
                     qDebug()<<"Tag:"<<tag_name<<"mid:"<<mid<<"sid:"<<sid<<"Path:"<<filename;
                 }
             }
@@ -232,6 +232,7 @@ bool GameScene::Load(QString filename, CreatorGameObject* creator)
                     if (creator!=0)
                     {
                         obj = creator->CreateGameObject(type);
+                        obj->SetType(type);
                     }
                     if (obj!=0)
                     {
